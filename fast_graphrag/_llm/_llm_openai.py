@@ -22,6 +22,7 @@ from fast_graphrag._types import BaseModelAlias
 from fast_graphrag._utils import logger, throttle_async_func_call
 
 from ._base import BaseEmbeddingService, BaseLLMService, T_model
+from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 
 TIMEOUT_SECONDS = 180.0
 
@@ -167,13 +168,13 @@ class OpenAIEmbeddingService(BaseEmbeddingService):
             texts[i * self.max_elements_per_request : (i + 1) * self.max_elements_per_request]
             for i in range((len(texts) + self.max_elements_per_request - 1) // self.max_elements_per_request)
         ]
-        response = await asyncio.gather(*[self._embedding_request(b, model) for b in batched_texts])
+        response = await asyncio.gather(*[self._embedding_request_vertex_ai(b, model) for b in batched_texts])
 
-        data = chain(*[r.data for r in response])
-        embeddings = np.array([dp.embedding for dp in data])
+        data = chain(*[r for r in response])
+        embeddings = np.array([dp for dp in data])
         logger.debug(f"Received embedding response: {len(embeddings)} embeddings")
 
-        return embeddings
+        return response[0]
 
     @retry(
         stop=stop_after_attempt(3),
@@ -182,3 +183,35 @@ class OpenAIEmbeddingService(BaseEmbeddingService):
     )
     async def _embedding_request(self, input: List[str], model: str) -> Any:
         return await self.embedding_async_client.embeddings.create(model=model, input=input, encoding_format="float")
+
+    def _embed_text(
+        self,
+        texts: list = None,
+        task: str = "RETRIEVAL_DOCUMENT",
+        dimensionality: Optional[int] = 256,
+    ) -> List[List[float]]:
+        """Embeds texts with a pre-trained, foundational model.
+        Args:
+            texts (List[str]): A list of texts to be embedded.
+            task (str): The task type for embedding. Check the available tasks in the model's documentation.
+            dimensionality (Optional[int]): The dimensionality of the output embeddings.
+        Returns:
+            List[List[float]]: A list of lists containing the embedding vectors for each input text
+        """
+        if texts is None:
+            texts = ["banana muffins? ", "banana bread? banana muffins?"]
+        model = TextEmbeddingModel.from_pretrained("text-embedding-004")
+        inputs = [TextEmbeddingInput(text, task) for text in texts]
+        kwargs = dict(output_dimensionality=dimensionality) if dimensionality else {}
+        embeddings = model.get_embeddings(inputs, **kwargs)
+        # Example response:
+        # [[0.006135190837085247, -0.01462465338408947, 0.004978656303137541, ...],
+        return [embedding.values for embedding in embeddings]
+
+    async def _embedding_request_vertex_ai(self, input: List[str], model: str) -> Any:
+        return self._embed_text(
+            texts=input,
+            dimensionality=768,
+        )
+    
+    
