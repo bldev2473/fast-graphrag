@@ -28,6 +28,7 @@ class QueryParam:
     entities_max_tokens: int = field(default=4000)
     relations_max_tokens: int = field(default=3000)
     chunks_max_tokens: int = field(default=9000)
+    additional_system_prompt: str | None = field(default=None)
 
 
 @dataclass
@@ -206,7 +207,8 @@ class BaseGraphRAG(Generic[GTEmbedding, GTHash, GTChunk, GTNode, GTEdge, GTId]):
                 llm=self.llm_service,
                 format_kwargs={
                     "query": query,
-                    "context": context_str
+                    "context": context_str,
+                    "additional_system_prompt": params.additional_system_prompt,
                 },
                 response_model=TAnswer,
             )

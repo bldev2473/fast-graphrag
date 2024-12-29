@@ -153,6 +153,7 @@ Answer:
 """
 
 PROMPTS["generate_response_query_no_references"] = """You are a helpful assistant analyzing the given input data to provide an helpful response to the user query.
+{additional_system_prompt}
 
 # INPUT DATA
 {context}
