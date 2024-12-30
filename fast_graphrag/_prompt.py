@@ -175,4 +175,27 @@ Follow these steps:
 Answer:
 """
 
+PROMPTS["generate_response_query_no_references_llm_knowledge_based_answer_allowed"] = """You are a helpful assistant analyzing the given input data to provide an helpful response to the user query.
+{additional_system_prompt}
+
+# INPUT DATA
+{context}
+
+# USER QUERY
+{query}
+
+# INSTRUCTIONS
+Your goal is to provide a response to the user query using the relevant information in the input data:
+- the "Entities" and "Relationships" tables contain high-level information. Use these tables to identify the most important entities and relationships to respond to the query.
+- the "Sources" list contains raw text sources to help answer the query. It may contain noisy data, so pay attention when analyzing it.
+
+Follow these steps:
+1. Read and understand the user query.
+2. Look at the "Entities" and "Relationships" tables to get a general sense of the data and understand which information is the most relevant to answer the query.
+3. Carefully analyze all the "Sources" to get more detailed information. Information could be scattered across several sources, use the identified relevant entities and relationships to guide yourself through the analysis of the sources.
+4. Write the response to the user query based on the information you have gathered. Be very concise and answer the user query directly. Try to answer the question using the provided documents. If the answer cannot be found in the documents, you may use your own knowledge to answer. If you use your own knowledge, start your response with "I could not find relevant information in the provided documents. Based on my knowledge, ". Also, please express any uncertainty in your answer by using phrases like "I believe," "It is likely that," or "This may not be entirely accurate, but".
+
+Answer:
+"""
+
 PROMPTS["fail_response"] = "Sorry, I'm not able to provide an answer to that question."

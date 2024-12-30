@@ -29,7 +29,7 @@ class QueryParam:
     relations_max_tokens: int = field(default=3000)
     chunks_max_tokens: int = field(default=9000)
     additional_system_prompt: str | None = field(default=None)
-
+    allow_llm_knowledge_based_answer: bool = field(default=False)
 
 @dataclass
 class BaseGraphRAG(Generic[GTEmbedding, GTHash, GTChunk, GTNode, GTEdge, GTId]):
@@ -200,10 +200,14 @@ class BaseGraphRAG(Generic[GTEmbedding, GTHash, GTChunk, GTNode, GTEdge, GTId]):
         if params.only_context:
             answer = ""
         else:
+            prompt_key = "generate_response_query_with_references"
+            if params.allow_llm_knowledge_based_answer:
+                prompt_key = "generate_response_query_no_references_llm_knowledge_based_answer_allowed"
+            if not params.with_references:
+                prompt_key = "generate_response_query_no_references"
+            
             llm_response, _ = await format_and_send_prompt(
-                prompt_key="generate_response_query_with_references"
-                if params.with_references
-                else "generate_response_query_no_references",
+                prompt_key=prompt_key,
                 llm=self.llm_service,
                 format_kwargs={
                     "query": query,
