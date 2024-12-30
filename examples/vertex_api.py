@@ -9,10 +9,8 @@ auth_req = google.auth.transport.requests.Request()
 creds.refresh(auth_req)
 
 # Pass the Vertex endpoint and authentication to the OpenAI SDK
-PROJECT = 'twokeywords'
-LOCATION = (
-    'asia-northeast3'  # https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations
-)
+PROJECT = "project"
+LOCATION = "location"
 base_url = f'https://{LOCATION}-aiplatform.googleapis.com/v1beta1/projects/{PROJECT}/locations/{LOCATION}/endpoints/openapi'
 
 client = instructor.from_openai(
