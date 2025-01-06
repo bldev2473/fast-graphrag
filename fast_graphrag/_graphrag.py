@@ -200,11 +200,11 @@ class BaseGraphRAG(Generic[GTEmbedding, GTHash, GTChunk, GTNode, GTEdge, GTId]):
         if params.only_context:
             answer = ""
         else:
-            prompt_key = "generate_response_query_with_references"
+            prompt_key = "generate_response_query_no_references"
             if params.allow_llm_knowledge_based_answer:
                 prompt_key = "generate_response_query_no_references_llm_knowledge_based_answer_allowed"
-            if not params.with_references:
-                prompt_key = "generate_response_query_no_references"
+            if params.with_references:
+                prompt_key = "generate_response_query_with_references"
             
             llm_response, _ = await format_and_send_prompt(
                 prompt_key=prompt_key,
